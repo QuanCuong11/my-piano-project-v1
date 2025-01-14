@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Piano Playing</title>
+	<style>
+		@import url('https://fonts.googleapis.com/css2?family=Poppins&amp;display=swap');
+
+		body {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+			font-family: Poppins, sans-serif;
+		}
+
+		/* Thêm hiệu ứng khi phím đang được nhấn */
+		.piano-keys.playing {
+			background-color: #ffd966;
+			/* Màu vàng nhạt hơn */
+			box-shadow: 0 0 20px rgba(255, 217, 102, 0.7),
+				/* Hiệu ứng phát sáng nhẹ */
+				0 0 40px rgba(255, 217, 102, 0.5),
+				/* Hiệu ứng phát sáng mở rộng */
+				0 0 60px rgba(255, 217, 102, 0.3);
+			/* Hiệu ứng đổ bóng mờ */
+			transition: background-color 0.3s ease,
+				box-shadow 0.3s ease;
+		}
+
+
+		.btnClass {
+			display: flex;
+			flex-direction: column;
+			/* Sắp xếp các input theo chiều dọc */
+			align-items: center;
+			gap: 10px;
+			/* Khoảng cách giữa các input */
+		}
+
+		input {
+			padding: 10px;
+			width: 200px;
+			/* Đặt chiều rộng cho các input */
+			border: 1px solid #ccc;
+			border-radius: 5px;
+		}
+
+		button {
+			padding: 10px;
+			width: 200px;
+			/* Đặt chiều rộng cho các button */
+			border: 1px solid #ccc;
+			border-radius: 5px;
+		}
+		
+		#stop-btn {
+		    background-color: #ff4d4d;
+		    color: white;
+		    border: none;
+		    padding: 10px 20px;
+		    font-size: 16px;
+		    cursor: pointer;
+		    border-radius: 5px;
+		    transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
+		}
+
+		#stop-btn:active {
+		    background-color: #ff1a1a;
+		    transform: scale(0.95);
+		    box-shadow: 0 4px 8px rgba(255, 0, 0, 0.5);
+		}
+
+
+		/* Thêm lớp cho các input không hợp lệ */
+		.error-input {
+			border-color: red;
+			outline: none;
+			box-shadow: 0 0 5px red;
+		}
+
+		/* Thêm lớp cho thông báo thành công */
+		.success-message {
+			color: green !important;
+		}
+
+
+		.container {
+			width: 100%;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.piano-container {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.piano-keys-list {
+			list-style: none;
+			display: flex;
+			justify-content: center;
+			padding-left: 0px;
+		}
+
+		.piano-keys {
+			width: 3.8rem;
+			cursor: pointer;
+			position: relative;
+			height: 20rem;
+			border-radius: 10px;
+			border: 1px solid #000;
+		}
+
+		.white-key {
+			background-color: #fff;
+		}
+
+		.black-key {
+			width: 2rem;
+			height: 13rem;
+			border-radius: 5px;
+			border-top-left-radius: 0;
+			border-top-right-radius: 0;
+			background-color: #000;
+			z-index: 2;
+			margin: 0 -20px 0 -20px;
+		}
+
+		@media screen and (min-width: 821px) and (max-width: 1024px) {
+			.piano-keys {
+				width: 4rem;
+				cursor: pointer;
+				position: relative;
+				height: 20rem;
+				border-radius: 10px;
+				border: 1px solid #000;
+			}
+
+			.black-key {
+				width: 2rem;
+				height: 13rem;
+				border-radius: 5px;
+				border-top-left-radius: 0;
+				border-top-right-radius: 0;
+				background-color: #000;
+				z-index: 2;
+				margin: 0 -20px 0 -20px;
+			}
+		}
+
+		@media screen and (min-width: 768px) and (max-width: 820px) {
+			.piano-keys {
+				width: 3.5rem;
+				cursor: pointer;
+				position: relative;
+				height: 16rem;
+				border-radius: 10px;
+				border: 1px solid #000;
+			}
+
+			.black-key {
+				width: 1.8rem;
+				height: 10rem;
+				border-radius: 5px;
+				border-top-left-radius: 0;
+				border-top-right-radius: 0;
+				background-color: #000;
+				z-index: 2;
+				margin: 0 -20px 0 -20px;
+			}
+		}
+
+		@media screen and (max-width: 576px) {
+			.piano-container {
+				width: 90%;
+				display: flex;
+				align-items: center;
+				justify-content: flex-start;
+				overflow: auto;
+			}
+
+			.piano-keys {
+				width: 3.5rem;
+				cursor: pointer;
+				position: relative;
+				height: 16rem;
+				border-radius: 10px;
+				border: 1px solid #000;
+			}
+
+			.black-key {
+				width: 1.8rem;
+				height: 10rem;
+				border-radius: 5px;
+				border-top-left-radius: 0;
+				border-top-right-radius: 0;
+				background-color: #000;
+				z-index: 2;
+				margin: 0 -20px 0 -20px;
+			}
+		}
+	</style>
+</head>
+
+<body>
+	<div class="container">
+		<div class="piano-container">
+			<ul class="piano-keys-list">
+				<li class="piano-keys white-key" data-key="F2"></li>
+				<li class="piano-keys black-key" data-key="F#2"></li>
+				<li class="piano-keys white-key" data-key="G2"></li>
+				<li class="piano-keys black-key" data-key="G#2"></li>
+				<li class="piano-keys white-key" data-key="A2"></li>
+				<li class="piano-keys black-key" data-key="A#2"></li>
+				<li class="piano-keys white-key" data-key="B2"></li>
+				<li class="piano-keys white-key" data-key="C3"></li>
+				<li class="piano-keys black-key" data-key="C#3"></li>
+				<li class="piano-keys white-key" data-key="D3"></li>
+				<li class="piano-keys black-key" data-key="D#3"></li>
+				<li class="piano-keys white-key" data-key="E3"></li>
+
+				<li class="piano-keys white-key" data-key="F3"></li>
+				<li class="piano-keys black-key" data-key="F#3"></li>
+				<li class="piano-keys white-key" data-key="G3"></li>
+				<li class="piano-keys black-key" data-key="G#3"></li>
+				<li class="piano-keys white-key" data-key="A3"></li>
+				<li class="piano-keys black-key" data-key="A#3"></li>
+				<li class="piano-keys white-key" data-key="B3"></li>
+				<li class="piano-keys white-key" data-key="C4"></li>
+				<li class="piano-keys black-key" data-key="C#4"></li>
+				<li class="piano-keys white-key" data-key="D4"></li>
+				<li class="piano-keys black-key" data-key="D#4"></li>
+				<li class="piano-keys white-key" data-key="E4"></li>
+
+				<li class="piano-keys white-key" data-key="F4"></li>
+				<li class="piano-keys black-key" data-key="F#4"></li>
+				<li class="piano-keys white-key" data-key="G4"></li>
+				<li class="piano-keys black-key" data-key="G#4"></li>
+				<li class="piano-keys white-key" data-key="A4"></li>
+				<li class="piano-keys black-key" data-key="A#4"></li>
+				<li class="piano-keys white-key" data-key="B4"></li>
+				<li class="piano-keys white-key" data-key="C5"></li>
+				<li class="piano-keys black-key" data-key="C#5"></li>
+				<li class="piano-keys white-key" data-key="D5"></li>
+				<li class="piano-keys black-key" data-key="D#5"></li>
+				<li class="piano-keys white-key" data-key="E5"></li>
+			</ul>
+		</div>
+	</div>
+	<div class="btnClass">
+		<div id="noteId"></div>
+		<input type="number" id="note-count" placeholder="Số quãng" min="1" value="3" />
+		<input type="text" id="repeat-pattern" placeholder="Số lần phát (vd: 1,1,6)" value="1,1,6" />
+		<input type="number" id="sustain-time" placeholder="Thời gian ngân" step="0.1" value="1.2" />
+		<button id="stop-btn">Stop</button>
+		<div id="error-message" style="color: red;"></div>
+	</div>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.35/Tone.min.js"></script>
+
+	<script>
+		let synth;
+		let intervalId;
+		let noteIndex = 0;
+		let repeatCount = 0;
+
+		function initSynth() {
+			synth = new Tone.Synth().toDestination();
+		}
+
+		function playNoteWithTone(note, sustainTime) {
+			// Tìm phím tương ứng với nốt nhạc
+			const keyElement = document.querySelector(`.piano-keys[data-key="${note}"]`);
+
+			if (keyElement) {
+				// Thêm class để tạo hiệu ứng màu (ví dụ: "playing")
+				keyElement.classList.add('playing');
+
+			}
+			// set value noteId
+			document.getElementById("noteId").innerHTML = note;
+			// Phát âm thanh
+			synth.triggerAttackRelease(note, sustainTime);
+
+			if (keyElement) {
+				// Sau thời gian sustainTime, xóa hiệu ứng màu
+				setTimeout(() => {
+					keyElement.classList.remove('playing');
+				}, sustainTime * 1000);  // Chuyển đổi từ giây sang mili giây
+			}
+		}
+
+		function startPlaying(notes, repeatPattern, sustainTime) {
+			noteIndex = 0;
+			repeatCount = 0;
+			intervalId = setInterval(() => {
+				playNoteWithTone(notes[noteIndex], sustainTime);
+				repeatCount++;
+				if (repeatCount >= repeatPattern[noteIndex]) {
+					noteIndex++;
+					repeatCount = 0;
+				}
+				if (noteIndex >= notes.length) {
+					noteIndex = 0;
+				}
+			}, 1000);
+		}
+
+		function stopPlaying() {
+			clearInterval(intervalId);
+			var errorMessageDiv = document.getElementById('error-message');
+			errorMessageDiv.innerHTML = '';
+			document.getElementById("noteId").innerHTML = '';
+		}
+
+		document.getElementById('stop-btn').addEventListener('click', stopPlaying);
+
+		window.onload = initSynth;
+
+		const keys = document.querySelectorAll('.piano-keys');
+		var noteCountInput = document.getElementById('note-count');
+		var repeatPatternInput = document.getElementById('repeat-pattern');
+		var sustainTimeInput = document.getElementById('sustain-time');
+
+		keys.forEach((key) => {
+			key.addEventListener('click', (e) => {
+				stopPlaying();
+				if (validate()) {
+					const note = key.getAttribute('data-key');
+					let noteName = note.slice(0, -1);
+					let octave = parseInt(note.slice(-1));
+					let notesArray = [];
+
+					for (let i = 0; i < noteCountInput.value; i++) {
+						notesArray.push(noteName + (octave + i));
+					}
+
+					// Chuyển đổi chuỗi thành mảng số nguyên
+					const repeatPattern = repeatPatternInput.value.split(',').map(Number);
+					startPlaying(notesArray, repeatPattern, sustainTimeInput.value);
+				}
+			});
+		});
+
+		function validate() {
+			var errorMessageDiv = document.getElementById('error-message');
+			let errorMessage = '';
+
+			// Xóa lớp lỗi cũ nếu có
+			noteCountInput.classList.remove('error-input');
+			repeatPatternInput.classList.remove('error-input');
+			sustainTimeInput.classList.remove('error-input');
+			errorMessageDiv.classList.remove('success-message'); // Xóa lớp thành công nếu có
+
+			// 1. Validate note-count (bắt buộc là số nguyên lớn hơn 0)
+			const noteCount = parseInt(noteCountInput.value);
+			if (isNaN(noteCount) || noteCount <= 0) {
+				errorMessage += 'Số quãng phải là số nguyên lớn hơn 0.<br>';
+				noteCountInput.classList.add('error-input'); // Thêm lớp lỗi
+			}
+
+			// 2. Validate repeat-pattern (phải cách nhau bởi dấu phẩy, không được có dấu phẩy đầu hoặc cuối)
+			const repeatPattern = repeatPatternInput.value.trim(); // Xóa khoảng trắng thừa
+			const repeatPatternArray = repeatPattern.split(',');
+
+			// Kiểm tra số lượng dấu phẩy (dấu phẩy phải ít hơn noteCount 1 đơn vị)
+			if (repeatPatternArray.length !== noteCount) {
+				errorMessage += `Số dấu phẩy trong chuỗi phải là ${noteCount - 1}.<br>`;
+				repeatPatternInput.classList.add('error-input'); // Thêm lớp lỗi
+			}
+
+			// Kiểm tra giữa các dấu phẩy bắt buộc phải có số
+			const repeatPatternRegex = /^\d+$/;
+			for (let i = 0; i < repeatPatternArray.length; i++) {
+				if (!repeatPatternRegex.test(repeatPatternArray[i])) {
+					errorMessage += `Phần tử thứ ${i + 1} của chuỗi số lần phát không hợp lệ. Mỗi phần tử phải là số nguyên.<br>`;
+					repeatPatternInput.classList.add('error-input'); // Thêm lớp lỗi
+				}
+			}
+
+			// 3. Validate sustain-time (tối thiểu là 1)
+			const sustainTime = parseFloat(sustainTimeInput.value);
+			if (isNaN(sustainTime) || sustainTime < 1) {
+				errorMessage += 'Thời gian ngân phải tối thiểu là 1 giây.<br>';
+				sustainTimeInput.classList.add('error-input'); // Thêm lớp lỗi
+			}
+
+			if (errorMessage) {
+				errorMessageDiv.innerHTML = errorMessage;
+				return false;
+			} else {
+				errorMessageDiv.classList.add('success-message'); // Thêm lớp thông báo thành công
+				errorMessageDiv.innerHTML = 'Bắt đầu!\r\n Nếu thấy rát và đau họng hãy dừng lại!';
+				return true;
+			}
+		}
+	</script>
+</body>
+</html>
